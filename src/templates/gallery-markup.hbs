@@ -1,0 +1,11 @@
+{{#each galleryItems}}
+  <a
+    class='gallery__item'
+    target='_self'
+    rel='nofollow, noreferrer'
+    title='Click to enlarge'
+    href='{{original}}'
+  >
+    <img class='gallery__image' src='{{preview}}' alt='{{description}}' />
+  </a>
+{{/each}}
