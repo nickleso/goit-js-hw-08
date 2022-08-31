@@ -1,57 +1,48 @@
+import storageAPI from './storage';
+var throttle = require('lodash.throttle');
+
 const formEl = document.querySelector('.feedback-form');
-
-const formData = {
-  email: document.querySelector('.feedback-form input'),
-  textarea: document.querySelector('.feedback-form textarea'),
-};
-
 const FORM_DATA = 'feedback-form-state';
-// const FORM_DATA_EMAIL = 'user email';
-// const FORM_DATA_TEXTAREA = 'user message';
 
-console.dir(formData.form);
-console.dir(formData.email);
-console.dir(formData.textarea);
+const throttleOnFormInput = throttle(onFormInput, 500);
 
+formEl.addEventListener('input', throttleOnFormInput);
 formEl.addEventListener('submit', onFormSubmit);
-formData.email.addEventListener('input', onFormInput);
 
-function onFormSubmit(evt) {
-  evt.preventDefault();
+initPage();
 
-  if (formData.email.value === '' || formData.textarea.value === '') {
+function initPage() {
+  const savedData = storageAPI.load(FORM_DATA);
+  if (!savedData) {
+    return;
+  }
+  Object.entries(savedData).forEach(([name, value]) => {
+    formEl.elements[name].value = value;
+  });
+}
+
+function onFormInput(event) {
+  const { name, value } = event.target;
+
+  let savedData = storageAPI.load(FORM_DATA);
+  savedData = savedData ? savedData : {};
+  savedData[name] = value;
+  storageAPI.save(FORM_DATA, savedData);
+}
+
+function onFormSubmit(event) {
+  event.preventDefault();
+
+  const {
+    elements: { email, message },
+  } = event.currentTarget;
+
+  if (email.value === '' || message.value === '') {
     return alert('Заповніть, будь-ласка, поля "Email" та "Message" !');
   }
 
-  console.log(`Форма надіслана!`);
-  evt.currentTarget.reset();
+  console.log({ email: email.value, message: message.value });
 
-  localStorage.removeItem(FORM_DATA);
+  event.currentTarget.reset();
+  storageAPI.remove(FORM_DATA);
 }
-
-function onFormInput(evt) {
-  //   const formElements = evt.currentTarget.elements;
-
-  //   const email = formData.email.value;
-  //   const message = formData.textarea.value;
-  formData[evt.target.name] = evt.target.value;
-
-  //   const feedbackData = {
-  //     email,
-  //     message,
-  //   };
-
-  localStorage.setItem(FORM_DATA, JSON.stringify(formData));
-}
-
-// function onEmailInput(evt) {
-//   const email = evt.target.value;
-//   console.log(email);
-//   localStorage.setItem(FORM_DATA_EMAIL, email);
-// }
-
-// function onTextareaInput(evt) {
-//   const message = evt.target.value;
-//   console.log(message);
-//   localStorage.setItem(FORM_DATA_TEXTAREA, message);
-// }
