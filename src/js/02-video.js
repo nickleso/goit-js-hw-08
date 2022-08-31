@@ -1,3 +1,6 @@
+// import Player from '@vimeo/player';
+var throttle = require('lodash.throttle');
+
 const iframe = document.querySelector('iframe');
 const player = new Vimeo.Player(iframe);
 
@@ -14,14 +17,18 @@ function currentTime({ seconds }) {
   localStorage.setItem(VIDEOPLAYER_CURRENT_TIME, timeToStart);
 }
 
-player.on('timeupdate', currentTime);
+const savedTime = localStorage.getItem(VIDEOPLAYER_CURRENT_TIME)
+  ? localStorage.getItem(VIDEOPLAYER_CURRENT_TIME)
+  : 0;
+console.log(`Paused on: ${savedTime} second`);
 
-const savedTime = localStorage.getItem(VIDEOPLAYER_CURRENT_TIME);
-console.log(`Pause on: ${savedTime} seconds`);
+const throttleCurrentTime = throttle(currentTime, 1000);
+
+player.on('timeupdate', throttleCurrentTime);
 
 player
   .setCurrentTime(savedTime)
-  .then(function (seconds) {
+  .then(function () {
     // seconds = the actual time that the player seeked to
   })
   .catch(function (error) {
