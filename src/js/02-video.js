@@ -17,28 +17,13 @@ function currentTime({ seconds }) {
   localStorage.setItem(VIDEOPLAYER_CURRENT_TIME, timeToStart);
 }
 
-const savedTime = localStorage.getItem(VIDEOPLAYER_CURRENT_TIME)
-  ? localStorage.getItem(VIDEOPLAYER_CURRENT_TIME)
-  : 0;
+let savedTime = localStorage.getItem(VIDEOPLAYER_CURRENT_TIME);
+savedTime = savedTime ? savedTime : 0;
+
 console.log(`Paused on: ${savedTime} second`);
 
 const throttleCurrentTime = throttle(currentTime, 1000);
 
 player.on('timeupdate', throttleCurrentTime);
 
-player
-  .setCurrentTime(savedTime)
-  .then(function () {
-    // seconds = the actual time that the player seeked to
-  })
-  .catch(function (error) {
-    switch (error.name) {
-      case 'RangeError':
-        // the time was less than 0 or greater than the video’s duration
-        break;
-
-      default:
-        // some other error occurred
-        break;
-    }
-  });
+player.setCurrentTime(savedTime);
